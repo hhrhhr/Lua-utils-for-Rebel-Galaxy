@@ -3,7 +3,7 @@ local zlib = require("lua_zlib")
 local lfs = require("lua_lfs")
 
 local in_path = arg[1] or "."
-local out_file = arg[2] or "DATA2.PAKS"
+local out_file = arg[2] or "DATA2.PAK"
 
 if in_path:sub(-1) ~= "\\" then
     in_path = in_path .. "\\"
