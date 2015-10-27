@@ -30,14 +30,12 @@ local function savefile(offset, fullname)
     local zsize = uint32()
     local data = r:read(zsize)
 
-    if size > zsize then
-        local stream = zlib.inflate()
-        local eof, bytes_in, bytes_out
-        data, eof, bytes_in, bytes_out = stream(data)
-        assert(true == eof, "eof ~= true")
-        assert(zsize == bytes_in, "bytes_in mismatch")
-        assert(size == bytes_out, "bytes_out mismatch")
-    end
+    local stream = zlib.inflate()
+    local eof, bytes_in, bytes_out
+    data, eof, bytes_in, bytes_out = stream(data)
+    assert(true == eof, "eof ~= true")
+    assert(zsize == bytes_in, "bytes_in mismatch")
+    assert(size == bytes_out, "bytes_out mismatch")
 
     local w = assert(io.open(fullname, "w+b"))
     w:write(data)
