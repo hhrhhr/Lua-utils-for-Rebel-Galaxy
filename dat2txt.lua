@@ -10,65 +10,53 @@ local function uint16() return string.unpack("<H", r:read(2)) end
 local function uint8()  return string.unpack("B",  r:read(1)) end
 local function float()  return string.unpack("f",  r:read(4)) end
 
-local dict_t = {
-    [1] = "INTEGER",
-    [2] = "FLOAT",
-    [5] = "STRING",
-    [6] = "BOOL",
-    [120] = "X",
-    [121] = "Y",
-    [745] = "UI",
-    [6434245] = "FILE",
-    [6688229] = "NAME",
-    [252743109] = "SCALE",
-    [257268424] = "WIDTH",
-    [343250261] = "HEIGHT",
-    [589835972] = "SPRITE",
-    [741659033] = "CONTAINER",
-    [1336946094] = "KEYBINDING",
-    [4127570586] = "KEYBINDINGS",
-}
-
-local function dict(key)
-    return dict_t[key] or ("$" .. key)
+-- dictionary
+local dict_i = {}
+local dict_e = {}
+local function dict_int(key)
+    return dict_i[key] or ("$" .. key)
+end
+local function dict_ext(key)
+    return dict_e[key] or ("$" .. key)
 end
 
+
 local function tab(level)
-    io.write((" "):rep(4 * level))
+    io.write((" "):rep(2 * level))
 end
 
 local function read_var(level)
     local nam = uint32()
     local typ = uint32()
     local val
-    if     typ == 1 then
+    if     typ == 1 then    -- int
         val = sint32()
-    elseif typ == 2 then
+    elseif typ == 2 then    -- float
         val = float()
-    elseif typ == 5 then
+    elseif typ == 5 then    -- string from dict
         val = uint32()
-        val = dict(val)
-    elseif typ == 6 then
+        val = dict_ext(val)
+    elseif typ == 6 then    -- bool
         val = uint32()
         val = (val == 0) and "false" or "true"
 
-    elseif typ == 8 then    -- ???
+    elseif typ == 8 then    -- localized string???
         val = uint32()
-        val = dict(val)
+        val = dict_ext(val)
 
     else
         val = uint32()
     end
 
-    nam = dict(nam)
-    typ = dict(typ)
+    nam = dict_int(nam)
+    typ = dict_int(typ)
     tab(level)
     print("<".. typ ..">" .. nam .. ":" .. val)
 end
 
 local function read_tag(level)
     local tag = uint32()
-    tag = dict(tag)
+    tag = dict_int(tag)
     tab(level)
     print("[" .. tag .. "]")
     level = level + 1
@@ -95,18 +83,26 @@ end
 r = assert(io.open(in_file, "rb"))
 assert(6 == uint8())
 
+-- generate internal dictionary
+local d = dofile("dict.lua")
+for i = 1, #d, 2 do
+    dict_i[d[i]] = d[i+1]
+end
+
+-- generate external dictionary
 local count = uint32()
 for i = 1, count do
     local idx = uint32()
     local len = uint16()
     local str = r:read(len)
-    local d = dict_t[idx]
+    local d = dict_e[idx]
     if d ~= nil then
         if d ~= str then
-            print("!!! COLLISION: dict[" .. idx .. "] = " .. d .. " <= " .. str)
+            print("!!! COLLISION: dict[" .. idx .. "] = " .. d .. ", but => " .. str)
         end
     end
-    dict_t[idx] = str
+    dict_e[idx] = str
+    --print("["..idx.."]=\""..str.."\"")
 end
 
 read_tag(0)
