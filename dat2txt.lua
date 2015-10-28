@@ -17,7 +17,8 @@ local function dict_int(key)
     return dict_i[key] or ("$" .. key)
 end
 local function dict_ext(key)
-    return dict_e[key] or ("$" .. key)
+    local k = dict_e[key]
+    return k and ("$" .. key .. ":" .. k) or ("$" .. key .. ":")
 end
 
 
@@ -91,6 +92,7 @@ end
 
 -- generate external dictionary
 local count = uint32()
+print("local dict_ext = {")
 for i = 1, count do
     local idx = uint32()
     local len = uint16()
@@ -102,8 +104,10 @@ for i = 1, count do
         end
     end
     dict_e[idx] = str
-    --print("["..idx.."]=\""..str.."\"")
+    print("    [" .. idx .. "] = '" .. str .. "',")
 end
+print("}")
+print(("-"):rep(80))
 
 read_tag(0)
 
