@@ -3,6 +3,7 @@ local dict = {
     2, "FLOAT",
     5, "STRING",
     6, "BOOL",
+    7, "INT64",
     8, "TRANSLATE", -- TODO: check this
     -- xx, "VECTOR2",
     -- xx, "VECTOR3",
