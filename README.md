@@ -50,10 +50,11 @@ lua dat2txt.lua fullpath_to_DAT [> output_file]
 
 #### проверка хешей
 ````
-lua hasher.lua [STRING]
+lua hasher.lua STRING1 [STRING2 [STRING3 [...]]
 ````
-рассчет хеша для строки STRING, вывод его в шестнадцатеричном и десятичном виде. пример:
+рассчет хеша для строки (строк) STRINGx и его вывод (десятичное значение, строка, шестнадцатеричное значение):
 ````
->lua hasher.lua START
-0x0F1B0E14  253431316 'START'
+>lua hasher.lua STRING1 1STRING
+1829089533, "STRING1", --0x6D05B0FD
+3815255475, "1STRING", --0xE3682DB3
 ````
