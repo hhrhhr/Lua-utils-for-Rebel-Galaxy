@@ -68,15 +68,16 @@ local function read_var(level)
         link = ""
     end
 
-    local fmt = "<%s type=\"%s\"%s>%s</%s>"
-    print(fmt:format(nam, typ, link, val, nam))
+    --local fmt = "<%s type=\"%s\"%s>%s</%s>"
+    local fmt = "<VAR name=\"%s\" type=\"%s\"%s>%s</VAR>"
+    print(fmt:format(nam, typ, link, val))
 end
 
 local function read_tag(level)
     local tag = uint32()
     tag = dict(dict_e, tag)
     tab(level)
-    print("<" .. tag .. ">")
+    print("<TAG name=\"" .. tag .. "\">")
     level = level + 1
 
     -- var
@@ -93,7 +94,7 @@ local function read_tag(level)
 
     level = level - 1
     tab(level)
-    print("</" .. tag .. ">")
+    print("</TAG>")
 end
 
 --[[ main ]]--------------------------------------------------------------------
@@ -129,7 +130,7 @@ for i = 1, count do
         end
     end
     dict_e[idx] = str
-    print("    <D id=\"" .. idx .. "\">" .. str .. "</D>")
+    print("    <_" .. idx .. ">" .. str .. "</_" .. idx .. ">")
 end
 print("</DICT>")
 

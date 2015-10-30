@@ -33,24 +33,29 @@ local function tab(level)
     io.write((" "):rep(2 * level))
 end
 
+local function wtab(level)
+    return ((" "):rep(2 * level))
+end
+
 local function read_var(level)
     local nam = uint32()
     local typ = uint32()
     local val
+    local link
     if     typ == 1 then    -- int
         val = sint32()
     elseif typ == 2 then    -- float
         val = float()
     elseif typ == 5 then    -- string from dict
-        val = uint32()
-        val = dict(dict_e, val)
+        link = uint32()
+        val = dict(dict_e, link)
     elseif typ == 6 then    -- bool
         val = uint32()
         val = (val == 0) and "false" or "true"
 
     elseif typ == 8 then    -- localized string???
-        val = uint32()
-        val = dict(dict_e, val)
+        link = uint32()
+        val = dict(dict_e, link)
 
     else
         val = uint32()
@@ -59,26 +64,39 @@ local function read_var(level)
 
     nam = dict(dict_e, nam)
     typ = dict(dict_t, typ)
-    tab(level)
 
-    print("<".. typ ..">" .. nam .. ":" .. val)
+    if link then
+        link = "{link:" .. link .. "}"
+    else
+        link = ""
+    end
+
+    return (wtab(level) .. "<".. typ ..">" .. nam .. ":" .. link .. val)
 end
+
 
 local function read_tag(level)
     local tag = uint32()
     tag = dict(dict_e, tag)
     tab(level)
-    print("[" .. tag .. "]")
+    io.write("[" .. tag .. "]")
     level = level + 1
 
-    -- var
+    -- vars
+    local text_vars = {}
     local num_vars = uint32()
+
     for i = 1, num_vars do
-        read_var(level)
+        table.insert(text_vars, read_var(level))
     end
     
-    -- sect
+    -- tags
     local num_tags = uint32()
+
+    io.write("{vars=" .. num_vars .. "}")
+    io.write("{tags=" .. num_tags .. "}\n")
+    print(table.concat(text_vars, "\n"))
+
     for i = 1, num_tags do
         read_tag(level)
     end
@@ -112,6 +130,7 @@ for i = 1, count do
     local idx = uint32()
     local len = uint16()
     local str = r:read(len)
+
     local d = dict_e[idx]
     if d ~= nil then
         if d ~= str then
