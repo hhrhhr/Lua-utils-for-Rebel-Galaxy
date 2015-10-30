@@ -1,5 +1,3 @@
-local str = arg[1] or "test"
-
 local function hash(str)
     local res = #str
     for i = 1, res do
@@ -9,6 +7,8 @@ local function hash(str)
     return(res)
 end
 
-local res = hash(str)
-
-print(string.format("0x%08X %10d '%s'", res, res, str))
+for i = 1, #arg do
+    local str = arg[i]
+    local res = hash(str)
+    print(string.format("%d, \"%s\", --0x%08X", res, str, res))
+end
