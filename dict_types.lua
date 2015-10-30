@@ -1,16 +1,22 @@
 local dict = {
-    0, "NOT SET",
     1, "INTEGER",
     2, "FLOAT",
-    -- 3, "UNSIGNED INTEGER", ??
-    -- 4, "STRING", ??
     5, "STRING",
     6, "BOOL",
-    -- 7, "VECTOR2", ??
-    -- 8, "VECTOR3", ??
-    8, "TRANSLATE",
-    -- 9, "VECTOR4", ??
-    -- 10, "INT64"
+    8, "TRANSLATE", -- TODO: check this
+    -- xx, "VECTOR2",
+    -- xx, "VECTOR3",
+    -- xx, "VECTOR4",
+    -- xx, "UNSIGNED INTEGER",
+    -- xx, "INT64"
+    -- xx, "DOUBLE"
+    -- xx, "NOTE"
+    -- xx, "WSTRING"
+    -- xx, "ANOT VALID"
+    -- xx, "NOT SET"
+    -- xx, ""
+    -- xx, ""
+    -- xx, ""
 }
 
 return dict
