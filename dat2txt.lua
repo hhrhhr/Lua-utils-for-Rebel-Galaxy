@@ -107,7 +107,7 @@ end
 
 -- generate internal dictionary
 local count = uint32()
-print("local dict_i = {")
+
 for i = 1, count do
     local idx = uint32()
     local len = uint16()
@@ -119,11 +119,11 @@ for i = 1, count do
         end
     end
     dict_e[idx] = str
-    print("    [" .. idx .. "] = '" .. str .. "',")
+    print("[" .. idx .. "] = " .. str)
 end
-print("}")
 print(("-"):rep(80))
 
 read_tag(0)
+
 
 r:close()
