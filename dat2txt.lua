@@ -10,15 +10,22 @@ local function uint16() return string.unpack("<H", r:read(2)) end
 local function uint8()  return string.unpack("B",  r:read(1)) end
 local function float()  return string.unpack("f",  r:read(4)) end
 
--- dictionary
-local dict_i = {}
-local dict_e = {}
-local function dict_int(key)
-    return dict_i[key] or ("$" .. key)
-end
-local function dict_ext(key)
-    local k = dict_e[key]
-    return k and ("$" .. key .. ":" .. k) or ("$" .. key .. ":")
+-- dictionaries
+local dict_i = {name = "internal"}  -- from current file
+local dict_e = {name = "external"}  -- from dict_ext
+local dict_t = {name = "types"}     -- from dict_type
+local dict_miss = {}                -- TODO: collect all missed keys
+
+local function dict(t, key)
+    local k = t[key]
+    if k == nil then
+        if not dict_miss[key] then
+            dict_miss[key] = 1
+            io.stderr:write("!!! unknown " .. t.name .. " key $" .. key .. "\n")
+        end
+        k = "$" .. key
+    end
+    return k
 end
 
 
@@ -36,28 +43,30 @@ local function read_var(level)
         val = float()
     elseif typ == 5 then    -- string from dict
         val = uint32()
-        val = dict_ext(val)
+        val = dict(dict_e, val)
     elseif typ == 6 then    -- bool
         val = uint32()
         val = (val == 0) and "false" or "true"
 
     elseif typ == 8 then    -- localized string???
         val = uint32()
-        val = dict_ext(val)
+        val = dict(dict_e, val)
 
     else
         val = uint32()
+        io.stderr:write("unknown typ " .. typ)
     end
 
-    nam = dict_int(nam)
-    typ = dict_int(typ)
+    nam = dict(dict_e, nam)
+    typ = dict(dict_t, typ)
     tab(level)
+
     print("<".. typ ..">" .. nam .. ":" .. val)
 end
 
 local function read_tag(level)
     local tag = uint32()
-    tag = dict_int(tag)
+    tag = dict(dict_e, tag)
     tab(level)
     print("[" .. tag .. "]")
     level = level + 1
@@ -84,15 +93,21 @@ end
 r = assert(io.open(in_file, "rb"))
 assert(6 == uint8())
 
--- generate internal dictionary
-local d = dofile("dict.lua")
+-- generate types dictionary
+local d = dofile("dict_types.lua")
 for i = 1, #d, 2 do
-    dict_i[d[i]] = d[i+1]
+    dict_t[d[i]] = d[i+1]
 end
 
 -- generate external dictionary
+local d = dofile("dict_ext.lua")
+for i = 1, #d, 2 do
+    dict_e[d[i]] = d[i+1]
+end
+
+-- generate internal dictionary
 local count = uint32()
-print("local dict_ext = {")
+print("local dict_i = {")
 for i = 1, count do
     local idx = uint32()
     local len = uint16()
@@ -100,7 +115,7 @@ for i = 1, count do
     local d = dict_e[idx]
     if d ~= nil then
         if d ~= str then
-            print("!!! COLLISION: dict[" .. idx .. "] = " .. d .. ", but => " .. str)
+            io.stderr:write("!!! COLLISION: idx=" .. idx .. ", old=" .. d .. ", new=" .. str)
         end
     end
     dict_e[idx] = str
