@@ -4,6 +4,7 @@ local in_file = assert(arg[1], "no input")
 local out_path = arg[2] or "."
 
 local r
+local function sint64() return string.unpack("<i8", r:read(8)) end
 local function uint32() return string.unpack("<I", r:read(4)) end
 local function sint32() return string.unpack("<i", r:read(4)) end
 local function uint16() return string.unpack("<H", r:read(2)) end
@@ -44,23 +45,23 @@ local function read_var(level)
         val = float()
     elseif typ == 5 then    -- string from dict
         link = uint32()
-        val = dict(dict_e, link)
+        val = dict(dict_i, link)
     elseif typ == 6 then    -- bool
         val = uint32()
         val = (val == 0) and "false" or "true"
+    elseif typ == 7 then    -- int64
+        val = sint64()
 
     elseif typ == 8 then    -- localized string???
         link = uint32()
-        val = dict(dict_e, link)
+        val = dict(dict_i, link)
 
     else
-        val = uint32()
-        io.stderr:write("unknown typ " .. typ)
+        assert(false, "!!! unknown typ " .. typ)
     end
 
     nam = dict(dict_e, nam)
     typ = dict(dict_t, typ)
-    tab(level)
 
     if link then
         link = " link=\"" .. link .. "\""
@@ -70,6 +71,7 @@ local function read_var(level)
 
     --local fmt = "<%s type=\"%s\"%s>%s</%s>"
     local fmt = "<VAR name=\"%s\" type=\"%s\"%s>%s</VAR>"
+    tab(level)
     print(fmt:format(nam, typ, link, val))
 end
 
@@ -80,13 +82,13 @@ local function read_tag(level)
     print("<TAG name=\"" .. tag .. "\">")
     level = level + 1
 
-    -- var
+    -- vars
     local num_vars = uint32()
     for i = 1, num_vars do
         read_var(level)
     end
     
-    -- sect
+    -- tags
     local num_tags = uint32()
     for i = 1, num_tags do
         read_tag(level)
@@ -123,13 +125,13 @@ for i = 1, count do
     local idx = uint32()
     local len = uint16()
     local str = r:read(len)
-    local d = dict_e[idx]
+    local d = dict_i[idx]
     if d ~= nil then
         if d ~= str then
-            io.stderr:write("!!! COLLISION: idx=" .. idx .. ", old=" .. d .. ", new=" .. str)
+            io.stderr:write("!!! COLLISION: idx=" .. idx .. ", old=" .. d .. ", new=" .. str .. "\n")
         end
     end
-    dict_e[idx] = str
+    dict_i[idx] = str
     print("    <_" .. idx .. ">" .. str .. "</_" .. idx .. ">")
 end
 print("</DICT>")

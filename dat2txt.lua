@@ -4,6 +4,7 @@ local in_file = assert(arg[1], "no input")
 local out_path = arg[2] or "."
 
 local r
+local function sint64() return string.unpack("<i8", r:read(8)) end
 local function uint32() return string.unpack("<I", r:read(4)) end
 local function sint32() return string.unpack("<i", r:read(4)) end
 local function uint16() return string.unpack("<H", r:read(2)) end
@@ -48,18 +49,19 @@ local function read_var(level)
         val = float()
     elseif typ == 5 then    -- string from dict
         link = uint32()
-        val = dict(dict_e, link)
+        val = dict(dict_i, link)
     elseif typ == 6 then    -- bool
         val = uint32()
         val = (val == 0) and "false" or "true"
+    elseif typ == 7 then    -- int64
+        val = sint64()
 
     elseif typ == 8 then    -- localized string???
         link = uint32()
-        val = dict(dict_e, link)
+        val = dict(dict_i, link)
 
     else
-        val = uint32()
-        io.stderr:write("unknown typ " .. typ)
+        assert(false, "!!! unknown typ " .. typ)
     end
 
     nam = dict(dict_e, nam)
@@ -131,18 +133,17 @@ for i = 1, count do
     local len = uint16()
     local str = r:read(len)
 
-    local d = dict_e[idx]
+    local d = dict_i[idx]
     if d ~= nil then
         if d ~= str then
-            io.stderr:write("!!! COLLISION: idx=" .. idx .. ", old=" .. d .. ", new=" .. str)
+            io.stderr:write("!!! COLLISION: idx=" .. idx .. ", old=" .. d .. ", new=" .. str .. "\n")
         end
     end
-    dict_e[idx] = str
+    dict_i[idx] = str
     print("[" .. idx .. "] = " .. str)
 end
 print(("-"):rep(80))
 
 read_tag(0)
-
 
 r:close()
