@@ -40,13 +40,18 @@ local dict_i = {name = "internal"}  -- from current file
 local dict_e = {name = "external"}  -- from dict_ext
 local dict_t = {name = "types"}     -- from dict_type
 local dict_u = {name = "unknown"}   -- TODO: collect all missed keys
+local d_use = 1                     -- usage index
 
 local function dict(t, key)
     local k = t[key]
     if t.name == "internal" then
+        if not k[4] then
+            k[4] = d_use
+            d_use = d_use + 1
+        end
         k = k[2]
     end
-    
+
     if k == nil then
         if not dict_u[key] then
             dict_u[key] = 1
@@ -64,7 +69,7 @@ local function read_var(level, idx)
     local nam = uint32()
     local typ = uint32()
     local val   -- get below
-    
+
     local link
     if     typ == 1 then    -- int
         val = sint32()
@@ -76,6 +81,7 @@ local function read_var(level, idx)
 --      val = ???()
     elseif typ == 5 then    -- string from internal dict
         val = uint32()
+        dict_i[val][3] = "S"    -- mark basic string
         val = dict(dict_i, val)
         --link = dict(dict_i, val)
         --val = "L[" .. val .. "]"
@@ -87,6 +93,7 @@ local function read_var(level, idx)
 
     elseif typ == 8 then    -- localized string???
         val = uint32()
+        dict_i[val][3] = "L"    -- mark localized string
         link = " --" .. dict(dict_i, val)
 --        val = "\"L" .. val .. "\""
 
@@ -112,7 +119,7 @@ local function read_tag(level, idx)
     local num_vars = uint32()
     if num_vars > 0 then
         tprint("+", ",")
-        
+
         tprint("%svars = {", tab(level))
 
         for i = 1, num_vars do
@@ -126,7 +133,7 @@ local function read_tag(level, idx)
     local num_tags = uint32()
     if num_tags > 0 then
         tprint("+", ",")
-        
+
         tprint("%stags = {", tab(level))
 
         for i = 1, num_tags do
@@ -197,25 +204,41 @@ if out_file then
     out = assert(io.open(out_file, "w+"))
 end
 
--- print internal dict (sorted by hash)
+
+-- print internal dict (sorted by usage)
 out:write("local L = {\n")
-local t = {}
+
+local t1 = {}   -- strings
+local t2 = {}   -- translates
 for k, v in pairs(dict_i) do
-    -- skip name and size keys
-    if type(k) == "number" then
-        table.insert(t, {k, v})
+    if type(k) == "number" then -- skip name and size keys
+        if v[3] == "L" then
+            table.insert(t2, {k, v})
+        else
+            table.insert(t1, {k, v})
+        end
     end
 end
-table.sort(t, function (a, b) return a[1] < b[1] end)
+table.sort(t1, function (a, b) return (a[2][4] < b[2][4]) end)
+table.sort(t2, function (a, b) return (a[2][4] < b[2][4]) end)
 
-local fmt = "  [%d] = { %s, %s },\n"
-out:write("  size = " .. #t .. ",\n")
-for _, v in ipairs(t) do
+local fmt = "  [%d] = { %4d, %s },\n"
+out:write("  size = " .. dict_i.size .. ",\n")
+
+out:write("  -- <TRANSLATE>\n")
+for _, v in ipairs(t2) do
     out:write(fmt:format(v[1], v[2][1], v[2][2]))
 end
+
+out:write("  -- <STRING>\n")
+for _, v in ipairs(t1) do
+    out:write(fmt:format(v[1], v[2][1], v[2][2]))
+end
+
 out:write("}\n")
 out:write(("--------"):rep(10))
 out:write("\n")
+
 
 -- print content
 out:write("-- n -> name, t -> type, v -> value\n")
