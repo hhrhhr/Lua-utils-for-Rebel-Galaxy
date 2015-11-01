@@ -223,7 +223,7 @@ table.sort(t1, function (a, b) return (a[2][4] < b[2][4]) end)
 table.sort(t2, function (a, b) return (a[2][4] < b[2][4]) end)
 
 local fmt = "  [%d] = { %4d, %s },\n"
-out:write("  size = " .. dict_i.size .. ",\n")
+out:write("  size = " .. #dict_i .. ",\n")
 
 out:write("  -- <TRANSLATE>\n")
 for _, v in ipairs(t2) do
