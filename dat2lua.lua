@@ -1,5 +1,8 @@
 assert("Lua 5.3" == _VERSION)
 
+local _,_, MY_PATH= string.find( arg[0], "(.+[/\\]).-" )
+assert(MY_PATH)
+
 local in_file = assert(arg[1], "no input")
 local out_file = arg[2]
 
@@ -160,13 +163,13 @@ r = assert(io.open(in_file, "rb"))
 assert(6 == uint8())
 
 -- generate types dictionary
-local d = dofile("dict_types.lua")
+local d = dofile(MY_PATH.."dict_types.lua")
 for i = 1, #d, 2 do
     dict_t[d[i]] = d[i+1]
 end
 
 -- generate external dictionary
-d = dofile("dict_ext.lua")
+d = dofile(MY_PATH.."dict_ext.lua")
 for i = 1, #d, 2 do
     dict_e[d[i]] = d[i+1]
 end
