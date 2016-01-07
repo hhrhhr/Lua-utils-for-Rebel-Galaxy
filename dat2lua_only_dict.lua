@@ -54,7 +54,6 @@ local function read_var()
     local typ = uint32()
     local val   -- get below
 
---    local link
     if     typ == 1 then    -- int
         val = sint32()
     elseif typ == 2 then    -- float
@@ -156,7 +155,7 @@ end
 
 local tmp = {}   -- all
 
-local count = 0
+count = 0
 for k, v in pairs(dict_i) do
     if type(k) == "number" then -- skip name and size keys
         table.insert(tmp, {k, v})
