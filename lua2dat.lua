@@ -15,23 +15,11 @@ local function float(v)  return string.pack("f",   v) end
 
 
 -- dictionaries
-local dict_i = {name = "internal"}  -- from current file
+--local dict_i = {name = "internal"}  -- from current file
 local dict_e = {name = "external"}  -- from dict_ext
 local dict_t = {name = "types"}     -- from dict_type
-local dict_u = {name = "unknown"}   -- TODO: collect all missed keys
+--local dict_u = {name = "unknown"}   -- TODO: collect all missed keys
 
-local function dict(t, key)
-    local k = t[key]
-    return k
-end
-
-
-local H = {}    -- [value]=key
-
-
-local function tab(level)
-    io.write((" "):rep(2 * level))
-end
 
 local function read_tag(t, l)
     local tag = dict_e[t.n]
@@ -40,7 +28,7 @@ local function read_tag(t, l)
     if t.vars then
         w:write(uint32(#t.vars))
         
-        for k, v in ipairs(t.vars) do
+        for _, v in ipairs(t.vars) do
             local typ = dict_t[v.t]
             
             local name = dict_e[v.n]
@@ -54,7 +42,7 @@ local function read_tag(t, l)
             elseif typ == 2 then    -- FLOAT
                 value = float(v.v)
             elseif typ == 5 then    -- STRING
-                value = uint32(H[v.v])
+                value = uint32(v.v)
             elseif typ == 6 then    -- BOOL
                 value = uint32(v.v and 1 or 0)
             elseif typ == 7 then    -- INT64
@@ -75,7 +63,7 @@ local function read_tag(t, l)
     if t.tags then
         w:write(uint32(#t.tags))
         
-        for k, v in ipairs(t.tags) do
+        for _, v in ipairs(t.tags) do
             read_tag(v, l+1)
         end
     else
@@ -103,7 +91,6 @@ local L, content = dofile(in_file)
 
 for k, v in pairs(L) do
     if type(k) == "number" then
-        H[v[2]] = k
         LS[v[1]] = k
     end
 end

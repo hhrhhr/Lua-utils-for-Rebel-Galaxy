@@ -82,21 +82,18 @@ local function read_var(level, idx)
     elseif typ == 5 then    -- string from internal dict
         val = uint32()
         dict_i[val][3] = "S"    -- mark basic string
-        val = dict(dict_i, val)
-        --link = dict(dict_i, val)
-        --val = "L[" .. val .. "]"
+        --val = dict(dict_i, val)
+        link = " --" .. dict(dict_i, val)
     elseif typ == 6 then    -- bool
         val = uint32()
         val = (val == 0) and "false" or "true"
     elseif typ == 7 then    -- int64
         val = sint64()
-
     elseif typ == 8 then    -- localized string???
         val = uint32()
         dict_i[val][3] = "L"    -- mark localized string
+        --val = dict(dict_i, val)
         link = " --" .. dict(dict_i, val)
---        val = "\"L" .. val .. "\""
-
     else
         assert(false, "\n!!! unknown typ " .. typ .. "\n\n")
     end
