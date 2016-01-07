@@ -1,3 +1,5 @@
+-- for path 1.07 (patch_rebel_galaxy_2.3.1.8)
+
 local conflict = {
     [80] = "Sorcerer",
     [2745] = "Damocles",
