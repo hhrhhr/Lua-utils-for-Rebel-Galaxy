@@ -40,6 +40,7 @@ local dict_i = {name = "internal"}  -- from current file
 local dict_e = {name = "external"}  -- from dict_ext
 local dict_t = {name = "types"}     -- from dict_type
 local dict_u = {name = "unknown"}   -- TODO: collect all missed keys
+local dict_c = {name = "conflict"}  -- from conflict_ids
 local d_use = 1                     -- usage index
 
 local function dict(t, key)
@@ -187,6 +188,14 @@ for i = 1, count do
     dict_i[idx] = { i, str }
 end
 
+-- generate conflict dictionary
+d = dofile("conflict_ids.lua")
+for k, v in pairs(d) do
+    dict_c[k] = true
+end
+
+d = nil
+
 
 -- start parse
 read_tag(1, 1)
@@ -224,6 +233,9 @@ out:write("  size = " .. #t1 + #t2 .. ",\n")
 
 out:write("  -- <TRANSLATE>\n")
 for _, v in ipairs(t2) do
+    if dict_c[v[1]] then
+        out:write("-- DO NOT TRANSLATE!\n")
+    end
     out:write(fmt:format(v[1], v[2][1], v[2][2]))
 end
 
