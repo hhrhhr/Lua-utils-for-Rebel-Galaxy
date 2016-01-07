@@ -1,3 +1,28 @@
+--[[
+
+1 - MESH/MDL (MeshSerializer_v1.40/MeshSerializer_Runic)
+2 - SKELETON (Serializer_v1.10)
+3 - DDS
+4 - PNG/TGA/BMP
+6 - OGG/WAV
+9 - MATERIAL
+10 - RAW
+12 - IMAGESET
+13 - TTF
+15 - DAT
+16 - LAYOUT
+17 - ANIMATION
+24 - PROGRAM
+25 - FONTDEF
+26 - COMPOSITOR
+27 - FRAG/FX/HLSL/VERT
+29 - PU
+30 - ANNO
+31 - SBIN (OGRE)
+32 - WDAT
+
+--]]
+
 assert("Lua 5.3" == _VERSION)
 local zlib = require("lua_zlib")
 local lfs = require("lua_lfs")
@@ -5,6 +30,7 @@ local lfs = require("lua_lfs")
 
 local in_file = assert(arg[1], "no input")
 local out_path = arg[2] or "debug"
+local filter = tonumber(arg[3]) or nil
 
 local function fromutf16le(str)
     local s = string.gsub(str, "(.)\x00", "%1")
@@ -45,6 +71,8 @@ end
 --[[ main ]]--------------------------------------------------------------------
 
 r = assert(io.open(in_file, "rb"))
+
+-- check for big files support
 local r_size = r:seek("end")
 assert(-1 ~= r_size, "this Lua doesn't support files larger than 2 Gb")
 r:seek("set")
@@ -70,8 +98,7 @@ for i = 1, count do
 
     local current_dir = fromutf16le(name):gsub("/", "\\")
     if "debug" == out_path then
-        print()
-        print(i .. "/" .. count, current_dir)
+        print("\n" .. i .. "/" .. count, current_dir)
     else
         mkdir(current_dir)
     end
@@ -96,7 +123,7 @@ for i = 1, count do
             if 8 == typ then
                 print("[" .. fullname .. "]")
                 mkdir(fullname)
-            else
+            elseif filter == nil or typ == filter then
                 print(fullname)
                 local save_pos = r:seek()
                 fullname = out_path .. "\\" .. current_dir .. typ .. "_" .. fn
