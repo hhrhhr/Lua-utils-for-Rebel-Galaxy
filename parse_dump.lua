@@ -1,7 +1,7 @@
 local dump = assert(arg[1], "\nno input\n\n")
 
 
-local pattern = "([%g]+)$"
+local pattern = "([%u][%u%d_]+)$"
 --local pattern = "ASCII \"([%u%d_]+)\""
 --local pattern = "ASCII \"([^\\\"]+)\"$"
 
@@ -20,7 +20,9 @@ local str = {}
 for line in io.lines(dump) do
     for s in string.gmatch(line, pattern) do
         if s then
-            table.insert(str, s)
+            if #s == #line then
+                table.insert(str, s)
+            end
         end
     end
 end
