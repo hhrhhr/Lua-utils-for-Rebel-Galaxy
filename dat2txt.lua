@@ -1,7 +1,7 @@
 assert("Lua 5.3" == _VERSION)
 
 local in_file = assert(arg[1], "no input")
-local out_path = arg[2] or "."
+local vanilla = (arg[2] == nil)
 
 local r
 local function sint64() return string.unpack("<i8", r:read(8)) end
@@ -31,11 +31,19 @@ end
 
 
 local function tab(level)
-    io.write((" "):rep(2 * level))
+    if not vanilla then
+        io.write((" "):rep(2 * level))
+    else
+        io.write(("\t"):rep(level))
+    end
 end
 
 local function wtab(level)
-    return ((" "):rep(2 * level))
+    if not vanilla then
+        return ((" "):rep(2 * level))
+    else
+        return (("\t"):rep(level))
+    end
 end
 
 local function read_var(level)
@@ -67,7 +75,7 @@ local function read_var(level)
     nam = dict(dict_e, nam)
     typ = dict(dict_t, typ)
 
-    if link then
+    if link and not vanilla then
         link = "{link:" .. link .. "}"
     else
         link = ""
@@ -88,18 +96,25 @@ local function read_tag(level)
     local text_vars = {}
     local num_vars = uint32()
 
-    for i = 1, num_vars do
+    for _ = 1, num_vars do
         table.insert(text_vars, read_var(level))
     end
-    
+
     -- tags
     local num_tags = uint32()
 
-    io.write("{vars=" .. num_vars .. "}")
-    io.write("{tags=" .. num_tags .. "}\n")
-    print(table.concat(text_vars, "\n"))
+    if not vanilla then
+        io.write("{vars=" .. num_vars .. "}")
+        io.write("{tags=" .. num_tags .. "}\n")
+    else
+        io.write("\n")
+    end
 
-    for i = 1, num_tags do
+    if num_vars > 0 then
+        print(table.concat(text_vars, "\n"))
+    end
+
+    for _ = 1, num_tags do
         read_tag(level)
     end
 
@@ -120,7 +135,7 @@ for i = 1, #d, 2 do
 end
 
 -- generate external dictionary
-local d = dofile("dict_ext.lua")
+d = dofile("dict_ext.lua")
 for i = 1, #d, 2 do
     dict_e[d[i]] = d[i+1]
 end
@@ -128,7 +143,7 @@ end
 -- generate internal dictionary
 local count = uint32()
 
-for i = 1, count do
+for _ = 1, count do
     local idx = uint32()
     local len = uint16()
     local str = r:read(len)
@@ -140,9 +155,13 @@ for i = 1, count do
         end
     end
     dict_i[idx] = str
-    print("[" .. idx .. "] = " .. str)
+    if not vanilla then
+        print("[" .. idx .. "] = " .. str)
+    end
 end
-print(("-"):rep(80))
+if not vanilla then
+    print(("-"):rep(80))
+end
 
 read_tag(0)
 
