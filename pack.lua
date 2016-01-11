@@ -4,6 +4,7 @@ local lfs = require("lua_lfs")
 
 local in_path = arg[1] or "."
 local out_file = arg[2] or "DATA2.PAK"
+local filter = arg[3]   -- ".DAT" for example
 
 if in_path:sub(-1) ~= "\\" then
     in_path = in_path .. "\\"
@@ -37,14 +38,21 @@ local function scan(path)
         if file == "." or file == ".." then
             goto next_file
         end
+        
+        -- filter by extension
+        local fullpath = path .. file
+        local attr = lfs.attributes(fullpath)
+        if attr.mode == "file" then
+            if filter and filter ~= file:sub(-4) then
+                goto next_file
+            end
+        end
 
         idx = idx + 1
         entries = entries + 1
 
-        local fullpath = path .. file
         local crc, typ, off, size, fname = 0, 8, 0, 0, ""
 
-        local attr = lfs.attributes(fullpath)
         if attr.mode == "directory" then
             fname = file .. "/"
 

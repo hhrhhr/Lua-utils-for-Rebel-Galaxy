@@ -2,6 +2,7 @@ assert("Lua 5.3" == _VERSION)
 
 local in_file = assert(arg[1], "no input")
 local out_file = arg[2] or "OUT.DAT"
+local fix_file = arg[3]
 
 
 -- binary write
@@ -18,6 +19,7 @@ local function float(v)  return string.pack("f",   v) end
 --local dict_i = {name = "internal"}  -- from current file
 local dict_e = {name = "external"}  -- from dict_ext
 local dict_t = {name = "types"}     -- from dict_type
+local dict_f = {name = "fixes"}     -- from optional arg[3] (list_duped_ids_lang.lua)
 --local dict_u = {name = "unknown"}   -- TODO: collect all missed keys
 
 
@@ -85,6 +87,11 @@ for i = 1, #d, 2 do
     dict_e[d[i+1]] = d[i]
 end
 
+-- generate fix dictionary
+if fix_file then
+    dict_f = dofile(fix_file)
+end
+
 -- generate internal dictionary
 local LS = {}   -- [idx]=key
 local L, content = dofile(in_file)
@@ -92,6 +99,12 @@ local L, content = dofile(in_file)
 for k, v in pairs(L) do
     if type(k) == "number" then
         LS[v[1]] = k
+
+        -- try to fix string
+        local f = dict_f[k]
+        if f then
+            L[k][2] = f
+        end
     end
 end
 -- check

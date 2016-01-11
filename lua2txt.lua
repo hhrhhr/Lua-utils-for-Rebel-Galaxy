@@ -24,7 +24,7 @@ local function read_tag(t, l)
     if t.vars then
         for k, v in ipairs(t.vars) do
             local value = v.v
-            if v.t == "TRANSLATE" then
+            if v.t == "TRANSLATE" or v.t == "STRING" then
                 value = L[value][2]
             end
             
