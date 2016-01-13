@@ -23,6 +23,9 @@ for /r "%UNPACK%_DAT" %%i in (*.DAT) do (
     set B=%%~dpni.LUA
     lua dat2lua.lua "!A!" "!B:unpack=export!" 2>>"%WORK%\dat2lua.err"
 )
+
+goto skip
+
 echo from ANIMATION...
 for /r "%UNPACK%_ANIMATION" %%i in (*.ANIMATION) do (
     set A=%%i
@@ -35,6 +38,9 @@ for /r "%UNPACK%_IMAGESET" %%i in (*.IMAGESET) do (
     set B=%%~dpni.LUA
     lua dat2lua.lua "!A!" "!B:unpack=export!" 2>>"%WORK%\dat2lua.err"
 )
+
+:skip
+
 setlocal DISABLEDELAYEDEXPANSION
 
 echo parse errlog...
