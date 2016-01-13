@@ -1,4 +1,5 @@
 local in_file = assert(arg[1], "\nno input\n\n")
+local shared = arg[2]
 
 
 -- load file (must be sorted and deduped)
@@ -39,7 +40,7 @@ for _, v in ipairs(dict_uniq) do
         if l[1] and t == "S" then
             l[1] = t
         end
-        assert(l[2] == s)
+        assert(l[2] == s, "\n\n" .. l[2] .. " ~= " .. s .. "\n\n")
     else
         lang[i] = {t, s}
     end
@@ -49,9 +50,21 @@ dict_uniq = nil
 local t = {}    -- TRANSLATE
 local s = {}    -- STRING
 
+if shared then
+    for i = 1, 2^15 do
+        if not lang[i] then
+            lang[i] = {"X", "nil"}
+        end
+    end
+end
+
 for k, v in pairs(lang) do
-    if v[1] == "T" then
-        table.insert(t, k)
+    if shared == nil then
+        if v[1] == "T" then
+            table.insert(t, k)
+        else
+            table.insert(s, k)
+        end
     else
         table.insert(s, k)
     end
@@ -59,20 +72,28 @@ end
 table.sort(t)
 table.sort(s)
 
-local fmt = "    [%d] = %s,"
+if shared then 
 
-print("local translate = {")
-for i = 1, #t do
-    local idx = t[i]
-    print(fmt:format(idx, lang[idx][2]))
+    local fmt = "    [%d] = {%s, %s},"
+    for i = 1, #s do
+        local idx = s[i]
+        print(fmt:format(idx, lang[idx][1], lang[idx][2]))
+    end
+
+else
+
+    local fmt = "    [%d] = %s,"
+    print("local translate = {")
+    for i = 1, #t do
+        local idx = t[i]
+        print(fmt:format(idx, lang[idx][2]))
+    end
+    print("}\nlocal strings = {")
+    for i = 1, #s do
+        local idx = s[i]
+        print(fmt:format(idx, lang[idx][2]))
+    end
+    print("}\n")
+    print("return translate, strings\n")
+
 end
-print("}\n")
-
-print("local strings = {")
-for i = 1, #t do
-    local idx = s[i]
-    print(fmt:format(idx, lang[idx][2]))
-end
-print("}\n")
-
-print("return translate, strings\n")
