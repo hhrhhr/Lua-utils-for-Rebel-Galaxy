@@ -1,7 +1,8 @@
 assert("Lua 5.3" == _VERSION)
 
 local in_file = assert(arg[1], "no input")
-local out_file = arg[2]
+local font_name = arg[2] or "Verdana"
+local font_file = arg[3] or "verdana.dds"
 
 local r = assert(io.open(in_file))
 
@@ -45,13 +46,13 @@ end
 
 r:close()
 
-io.write("Verdana\\Trivial\n")
+io.write(font_name .. "\n")
 
 io.write([[
 {
 	type	image
 	source	media/fonts/]])
-io.write("Verdana\\Trivial\n")
+io.write(font_file .. "\n")
 io.write("	uoffset	0\n")
 
 local w = t.scaleW
