@@ -102,12 +102,12 @@ r:close()
 
 
 -- get unique strings
-table.sort(dict)
+--table.sort(dict)
 
-local old = ""
+--local old = ""
 for k, v in ipairs(dict) do
-    if old ~= v then
+--    if old ~= v then
         print(v)
-    end
-    old = v
+--    end
+--    old = v
 end
