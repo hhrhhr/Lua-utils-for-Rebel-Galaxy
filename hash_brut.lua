@@ -2,7 +2,7 @@ local hash_needed = tonumber(arg[1]) or 0
 local start_value = arg[2] or "A"
 local depth = tonumber(arg[3]) or 1
 
-local dict_str = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ_"
+local dict_str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ_1234567890"
 --local dict_str = "ABCD"
 local diclen = #dict_str
 local dict = {}
