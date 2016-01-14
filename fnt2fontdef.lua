@@ -3,6 +3,7 @@ assert("Lua 5.3" == _VERSION)
 local in_file = assert(arg[1], "no input")
 local font_name = arg[2] or "Verdana"
 local font_file = arg[3] or "verdana.dds"
+local v_offset = arg[4]
 
 local r = assert(io.open(in_file))
 
@@ -55,13 +56,25 @@ io.write([[
 io.write(font_file .. "\n")
 io.write("	uoffset	0\n")
 
+
 local w = t.scaleW
 local h = t.scaleH
 
 for k, v in ipairs(t.char) do
     local id = v.id --+ 32
-    local x1, y1 = v.x / w, v.y / h
-    local x2, y2 = (v.x + v.width) / w, (v.y + v.height) / h
+    local vx = v.x
+    local vy = v.y
+    
+    local x1 = vx / w
+    local y1 = vy / h * 0.5
+    local x2 = (vx + v.width) / w
+    local y2 = (vy + v.height) / h * 0.5
+
+    if v_offset then
+        y1 = y1 + 0.5
+        y2 = y2 + 0.5
+    end
+
     local fmt = "\tglyph u%d %f %f %f %f\n"
     io.write(fmt:format(id, x1, y1, x2, y2))
 end
