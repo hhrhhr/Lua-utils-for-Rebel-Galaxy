@@ -56,7 +56,6 @@ local function dict(t, key)
     if k == nil then
         if not dict_u[key] then
             dict_u[key] = 1
-            --io.stderr:write("!!! unknown " .. t.name .. " key $" .. key .. "\n")
             errlog("[WARN] unknown " .. t.name .. " key $" .. key .. "\n")
         end
         k = "_" .. key
@@ -92,7 +91,7 @@ local function read_var(level, idx)
         val = sint64()
     elseif typ == 8 then    -- localized string???
         val = uint32()
-        dict_i[val][3] = "L"    -- mark localized string
+        dict_i[val][3] = "T"    -- mark localized string
         --val = dict(dict_i, val)
         link = " --" .. dict(dict_i, val)
     else
@@ -136,7 +135,6 @@ local function read_tag(level, idx)
 
         for i = 1, num_tags do
             local level = level + 1
---            tprint("%s[%d] = {", wtab(level), i)
             if i == 1 then
                 tprint("%s{    --%s[%d]", tab(level), tag, i)
             else
@@ -218,10 +216,12 @@ local t1 = {}   -- strings
 local t2 = {}   -- translates
 for k, v in pairs(dict_i) do
     if type(k) == "number" then -- skip name and size keys
-        if v[3] == "L" then
+        if     v[3] == "T" then
             table.insert(t2, {k, v})
-        else
+        elseif v[3] == "S" then
             table.insert(t1, {k, v})
+        else
+            assert(false, v[3])
         end
     end
 end
