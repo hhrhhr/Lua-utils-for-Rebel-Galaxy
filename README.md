@@ -5,7 +5,7 @@
 * lua-zlib (https://github.com/brimworks/lua-zlib)
 * lua-lfs (https://github.com/keplerproject/luafilesystem)
 
-для Win x64 имеется готовый комплект, [lua531_zlib_lfs_x64.zip](https://mega.nz/#!mxgGkYYY!SFJRF2feU_DdMu7L8dH-Syww-uUiO4_qbzDNLFstY8E).
+для Win x64 имеется готовый комплект, [lua_5.3.4_zlib_lfs_x64.zip](https://mega.nz/#!e4xmWCQZ!NmDjowuExvA7NAV6ZO1CIXeFTzAisQiHUzvyhuFuHuM).
 
 ## использование
 
