@@ -24,8 +24,8 @@
 --]]
 
 assert("Lua 5.3" == _VERSION)
-local zlib = require("lua_zlib")
-local lfs = require("lua_lfs")
+local zlib = require("zlib")
+local lfs = require("lfs")
 
 
 local in_file = assert(arg[1], "no input")

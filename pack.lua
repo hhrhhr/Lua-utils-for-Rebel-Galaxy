@@ -1,6 +1,6 @@
 assert("Lua 5.3" == _VERSION)
-local zlib = require("lua_zlib")
-local lfs = require("lua_lfs")
+local zlib = require("zlib")
+local lfs = require("lfs")
 
 local in_path = arg[1] or "."
 local out_file = arg[2] or "DATA2.PAK"
